@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script type="module">
+
+        // import kaboom lib
+        import kaboom from "https://unpkg.com/kaboom/dist/kaboom.mjs";
+
+        const FLOOR_HEIGHT = 10;
+        const JUMP_FORCE = 960;
+        const SPEED = 480;
+        const play = 0;
+
+        // initialize context
+        kaboom({ background: [3, 161, 252], });
+
+        // load assets
+        loadSprite("bean", "https://cdn-icons-png.flaticon.com/512/1864/1864472.png");
+        loadSprite("piller", "https://images.rawpixel.com/image_400/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTA1L3drNjMwNTI0NDItaW1hZ2Uta3A2Ym92NnguanBn.jpg");
+        loadSprite("grass", "https://images.rawpixel.com/image_png_1000/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvZnJiZWFjaF9wb3J0aGtpZG5leV9oYXlsZV9jb3Jud2FsbC1pbWFnZS0wMS1ybTUwNS5wbmc.png");
+        loadSprite("cloud", "https://cdn-icons-png.flaticon.com/128/616/616516.png");
+
+        const Start_game = add([
+            text("Click Anywhere to start game"),
+            pos(width() / 2, height() / 2),
+            scale(1),
+            origin("center"),
+
+        ]);
+        scene("game", () => {
+
+            // define gravity
+            gravity(2400);
+
+            // add a game object to screen
+            const player = add([
+                // list of components
+                sprite("bean"),
+                scale(0.1),
+                pos(80, 40),
+                area(),
+                body(),
+            ]);
+
+            // floor
+            add([
+                rect(width(), FLOOR_HEIGHT),
+                outline(0),
+                pos(0, height()),
+                origin("botleft"),
+                area(),
+                solid(),
+                color(56, 15, 3),
+            ]);
+
+            add([
+                sprite("grass", { width: width(), height: 48 }),
+                // rect(width(), 48),
+                outline(0),
+                pos(0, height() - FLOOR_HEIGHT),
+                origin("botleft"),
+                area(),
+                solid(),
+                color(9, 184, 12),
+            ]);
+
+            function jump() {
+                if (player.isGrounded()) {
+                    player.jump(JUMP_FORCE);
+                }
+            }
+
+            // jump when user press space
+            onKeyPress("space", jump);
+            onClick(jump);
+
+
+            function runcloud() {
+
+                add([
+                    sprite("cloud",{ width: 900 , height: 100 }),
+                    scale(0.2, rand(1.5)),
+                    area(),
+                    outline(0),
+                    pos(width(), 30),
+                    origin("center"),
+                    move(LEFT, 300),
+                ]);
+
+                // wait a random amount of time to spawn next tree
+                wait(rand(0.3, 0.5), runcloud);
+
+            }
+
+            // start spawning trees
+            runcloud();
+
+
+
+
+            function spawnTree() {
+
+                add([
+                    sprite("piller", { width: 48, height: rand(100, 130) }),
+                    area(),
+                    outline(0),
+                    pos(width(), height() - FLOOR_HEIGHT - 48),
+                    origin("botleft"),
+                    move(LEFT, SPEED),
+                    "tree",
+                ]);
+
+                // wait a random amount of time to spawn next tree
+                wait(rand(1, 2), spawnTree);
+
+            }
+
+            // start spawning trees
+            spawnTree();
+
+            // lose if player collides with any game obj with tag "tree"
+            player.onCollide("tree", () => {
+                // go to "lose" scene and pass the score
+                go("lose", score);
+                burp();
+                addKaboom(player.pos);
+            });
+
+            // keep track of score
+            let score = 0;
+
+            const scoreLabel = add([
+                text(score),
+                pos(20, 100),
+            ]);
+
+            // increment score every frame
+            onUpdate(() => {
+                score++;
+                scoreLabel.text = score;
+            });
+
+        });
+
+        scene("lose", (score) => {
+
+            add([
+                sprite("bean"),
+                pos(width() / 2, height() / 2 - 80),
+                scale(0.25),
+                origin("center"),
+            ]);
+
+            // display score
+            add([
+                text(score),
+                pos(width() / 2, height() / 2 + 80),
+                scale(2),
+                origin("center"),
+            ]);
+
+            // go back to game with space is pressed
+            onKeyPress("space", () => go("game"));
+            onClick(() => go("game"));
+
+        });
+        if (play == 1) {
+            go("game");
+        }
+        else {
+            onClick(() => go("game"));
+        }
+    </script>
+</body>
+
+</html>
