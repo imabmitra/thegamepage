@@ -121,8 +121,8 @@
 
         scene("game", () => {
             if (attempt_cnt == 0) {
-                a = score;
-                b = total_attempt;
+                let a = score;
+                let b = total_attempt;
                 score = 0;
                 total_attempt = choose([5, 7, 9]);
                 attempt_cnt = total_attempt + 1;
