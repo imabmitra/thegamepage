@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumpy Frog-The game page</title>
+</head>
+
+<body>
+    <script type="module">
+        // import kaboom lib
+        import kaboom from "https://unpkg.com/kaboom/dist/kaboom.mjs";
+
+        // initialize context
+        kaboom({ background: [3, 161, 252], });
+
+        let score = 0;
+        let total_attempt = choose([5, 7, 9]);
+        let attempt_cnt = total_attempt;
+
+        loadFont("unscii", "https://raw.githubusercontent.com/replit/kaboom/master/assets/fonts/unscii_8x8.png", 8, 8);
+        loadSound("Goal", "sounds/score.mp3");
+        // load assets
+        loadSprite("bean", "sprites/bean.png");
+        loadSprite("field_football", "sprites/field_football.jpg");
+        loadSprite("field", "sprites/field.jpg");
+        loadSprite("crowd", "sprites/crowd.jpg");
+        loadPedit("net", "sprites/net.pedit");
+        loadPedit("box", "sprites/box.pedit");
+        loadSprite("football", "https://cdn-icons-png.flaticon.com/512/184/184006.png");
+        loadSprite("goalkeeper", "sprites/goalkeeper.png");
+        loadSprite("player", "sprites/player.png");
+        // add a character to screen
+
+        add([
+            text("Let's play football!"),
+            pos(width() / 2, 100),
+            scale(1),
+            origin("center"),
+
+        ]);
+
+        add([
+            sprite("football"),
+            pos(width() / 2, height() / 2 - 50),
+            scale(0.25),
+            origin("center"),
+        ]);
+
+        add([
+            text("Click Anywhere to start game"),
+            pos(width() / 2, height() / 2 + 50),
+            scale(0.5),
+            origin("center"),
+
+        ]);
+
+        const instruction = add([
+            pos(width() / 2, height() / 2 + 150),
+            text("Instrution: Press UP, LEFT, RIGHT arrow key to take shot (Use desktop/laptop only)", {
+                size: 32, // 48 pixels tall
+                width: 700, // it'll wrap to next line when width exceeds this value
+                font: "apl386o", // there're 4 built-in fonts: "apl386", "apl386o", "sink", and "sinko"
+            }),
+            origin("center")
+        ]);
+
+        instruction.color = rgb(255, 0, 0);
+
+        const developer = add([
+            pos(width() / 2, height() - 100),
+            text("Game developed by: Abhishek(github.com/imabmitra)", {
+                size: 30, // 48 pixels tall
+                width: 700, // it'll wrap to next line when width exceeds this value
+                font: "apl386o", // there're 4 built-in fonts: "apl386", "apl386o", "sink", and "sinko"
+            }),
+            origin("center")
+        ]);
+
+
+        scene("game_over", (score, total_attempt) => {
+
+            if (score > total_attempt / 2) {
+                add([
+                    text("Congrats! You won the match"),
+                    pos(width() / 2, 100),
+                    scale(0.5),
+                    origin("center"),
+                ]);
+            }
+            else {
+                add([
+                    text("Tough Luck! You lost"),
+                    pos(width() / 2, 100),
+                    scale(0.5),
+                    origin("center"),
+                ]);
+            }
+            add([
+                sprite("football"),
+                pos(width() / 2, height() / 2 - 80),
+                scale(0.25),
+                origin("center"),
+            ]);
+
+            // display score
+            add([
+                text(score),
+                pos(width() / 2, height() / 2 + 80),
+                scale(2),
+                origin("center"),
+            ]);
+
+            // go back to game with space is pressed
+            onKeyPress("space", () => go("game"));
+            onClick(() => go("game"));
+            onTouchStart(() => go("game"));
+        });
+
+        scene("game", () => {
+            if (attempt_cnt == 0) {
+                a = score;
+                b = total_attempt;
+                score = 0;
+                total_attempt = choose([5, 7, 9]);
+                attempt_cnt = total_attempt + 1;
+                go("game_over", a, b)
+            }
+            add([
+                // list of components
+                sprite("field_football", { width: width(), height: height() / 2 + 80 }),
+                pos(0, height() / 2 - 80),
+                origin("topleft"),
+                area(),
+            ])
+            add([
+                rect(width(), 48),
+                area(),
+                outline(0),
+                pos(0, height() / 2 - 80),
+                origin("botleft"),
+                color(113, 0, 0),
+            ]);
+            add([
+                rect(width() - 20, 35),
+                area(),
+                outline(0),
+                pos(10, height() - 10),
+                origin("botleft"),
+                color(230, 230, 230)
+            ]);
+            add([
+                sprite("crowd", { width: width(), height: height() / 2 - 80 - 48 }),
+                pos(0, height() / 2 - 80 - 48),
+                origin("botleft"),
+            ])
+            add([
+                sprite("net", { width: 400, height: 150 }),
+                area(),
+                pos(width() / 2 - 200, height() / 2 - 80),
+                origin("botleft"),
+                "net"
+
+            ]);
+
+            add([
+                sprite("box", { width: 800, height: 300 }),
+                pos(width() / 2 - 400, height() / 2 - 80),
+                origin("topleft"),
+
+            ]);
+            add([
+                sprite("box", { width: 400, height: 150 }),
+                pos(width() / 2 - 200, height() / 2 - 80),
+                origin("topleft"),
+
+            ]);
+            add([
+                rect(width(), 10),
+                pos(0, height() / 2 - 85),
+                origin("topleft"),
+                color(255, 255, 255),
+            ]);
+
+            const football = add([
+                sprite("football", { width: 40, height: 40 }),
+                pos(width() / 2, height() / 2 + 220),
+                origin("center"),
+                area(),
+                solid(),
+                "fb"
+            ]);
+
+
+
+            const gk = add([
+                sprite("goalkeeper", { width: 100, height: 120 }),
+                pos(width() / 2 - 50, height() / 2 - 80),
+                origin("botleft"),
+                area(),
+                solid(),
+
+                {
+                    speed: 320,
+                    dir: choose([-1, 1]),
+                },
+                "gk"
+            ]);
+
+            const player = add([
+                sprite("player", { width: 120, height: 200 }),
+                pos(width() / 2 - 112, height() / 2 + 270),
+                origin("botleft"),
+                area()
+            ]);
+
+
+            onUpdate("gk", (p) => {
+                p.move(p.dir * p.speed, 0)
+                if (p.pos.x < width() / 2 - 200 || p.pos.x > width() / 2 + 100) {
+                    p.dir = -p.dir
+                }
+            })
+
+
+
+            const scoreLabel = add([
+                text("Goal:" + score + "/" + total_attempt, { font: "unscii", size: 40 }),
+                pos(24, height() - 40),
+                scale(0.5)
+            ]);
+            scoreLabel.color = rgb(77, 77, 77);
+            const Att_Label = add([
+                text("Attempt Left:" + attempt_cnt, { font: "unscii", size: 40 }),
+                pos(width() - 24, height() - 20),
+                origin("botright"),
+                scale(0.5),
+
+            ]);
+
+            Att_Label.color = rgb(245, 36, 1);
+            onKeyDown("up", () => {
+                // .move() is provided by pos() component, move by pixels per second
+
+                onUpdate("fb", (fb) => {
+                    fb.move(0, -1 * choose([1, 10, 20, 30, 40, 50, 60, 70, 80, 90]))
+                })
+
+            })
+
+            onKeyDown("right", () => {
+                // .move() is provided by pos() component, move by pixels per second
+
+                onUpdate("fb", (fb) => {
+                    fb.move(10, -1 * choose([1, 10, 20, 30, 40, 50, 60, 70, 80, 90]))
+                })
+
+            })
+
+            onKeyDown("left", () => {
+                // .move() is provided by pos() component, move by pixels per second
+
+                onUpdate("fb", (fb) => {
+                    fb.move(-10, -1 * choose([1, 10, 20, 30, 40, 50, 60, 70, 80, 90]))
+                })
+
+            })
+
+
+            football.onCollide("gk", (p) => {
+
+                destroy(football),
+                    burp();
+                wait(1.5, () => {
+                    go("game")
+                })
+
+
+            })
+
+            football.onCollide("net", (net) => {
+                score++;
+                scoreLabel.text = "Goal:" + score + "/" + total_attempt;
+                play("Goal"),
+                    wait(1.5, () => {
+                        go("game")
+                    })
+            })
+
+            attempt_cnt -= 1
+        })
+        onClick(() => go("game"));
+        onTouchStart(() => go("game"));
+
+    </script>
+</body>
+
+</html>
